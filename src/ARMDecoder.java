@@ -23,10 +23,10 @@ public class ARMDecoder {
 		
 		/*
 		Opcodes=new HashMap<String,String>();
-		Opcodes.put("0000","AND"); 
-		Opcodes.put("0001","EOR"); 
+		Opcodes.put("0000","AND"); d
+		Opcodes.put("0001","EOR"); d
 		Opcodes.put("0010","SUB"); d
-		Opcodes.put("0011","RSB");
+		Opcodes.put("0011","RSB"); 
 		Opcodes.put("0100","ADD"); d
 		Opcodes.put("0101","ADC"); 
 		Opcodes.put("0110","SBC");
@@ -35,7 +35,7 @@ public class ARMDecoder {
 		Opcodes.put("1001","TEQ");
 		Opcodes.put("1010","CMP"); d
 		Opcodes.put("1011","CMN"); d
-		Opcodes.put("1100","ORR");
+		Opcodes.put("1100","ORR"); d 
 		Opcodes.put("1101","MOV"); d
 		Opcodes.put("1110","BIC"); 
 		Opcodes.put("1111","MVN"); d
@@ -75,8 +75,10 @@ public class ARMDecoder {
 	
 	@SuppressWarnings("unchecked")
 	private static void init() {
+
 		try
-		{   
+		{  
+			
 			FileInputStream file = new FileInputStream("OPCODES.file");
 			ObjectInputStream o=new ObjectInputStream(file);
 			Opcodes=(HashMap<String,String>)o.readObject();
@@ -127,6 +129,56 @@ public class ARMDecoder {
 		String value = new BigInteger(instr.Value.substring(2), 16).toString(2);
 		String bin=String.format("%32s", value).replace(" ", "0");
 		
+		String flags=bin.substring(0,4);
+		if(flags.equals("0000")){
+			instr.Z=1;
+		}
+		else if(flags.equals("0001")){
+			instr.Z=0;
+		}
+		else if(flags.equals("0010")){
+			instr.C=1;
+		}
+		else if(flags.equals("0011")){
+			instr.C=0;
+		}
+		else if(flags.equals("0100")){
+			instr.N=1;
+		}
+		else if(flags.equals("0101")){
+			instr.N=0;
+		}
+		else if(flags.equals("0110")){
+			instr.V=1;
+		}
+		else if(flags.equals("0111")){
+			instr.V=0;
+		}		
+		else if(flags.equals("1000")){
+			instr.C=1;
+			instr.Z=0;
+		}
+		else if(flags.equals("1001")){
+				
+		}
+		else if(flags.equals("1010")){
+		
+		}	
+		else if(flags.equals("1011")){
+	
+		}
+		else if(flags.equals("1100")){
+		
+		}
+		else if(flags.equals("1101")){
+		
+		}
+		else if(flags.equals("1110")){
+		
+		}
+		else if(flags.equals("1111")){
+		
+		}
 		Register R1=null;
 		Register R2=null;
 		Register R3=null;
@@ -205,7 +257,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value-Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value+Long.valueOf(Imm.longValue());
 			}
 		}
 		if(Opcodes.get(OC).equals("SUB"))
@@ -265,6 +317,39 @@ public class ARMDecoder {
 				RD.Value=Long.valueOf(bin);
 			}
 		}
+		if(Opcodes.get(OC).equals("EOR"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				RD.Value=R1.Value^R2.Value;
+			}	
+			else
+			{
+				RD.Value=R1.Value^Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("ORR"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				RD.Value=R1.Value  | R2.Value;
+			}	
+			else
+			{
+				RD.Value=R1.Value | Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("AND"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				RD.Value=R1.Value & R2.Value;
+			}	
+			else
+			{
+				RD.Value=R1.Value & Long.valueOf(Imm.longValue());
+			}
+		}
 
 		
 		
@@ -306,6 +391,12 @@ public class ARMDecoder {
 class Instruction{
 	String Address;
 	String Value;
+	
+	
+	int N;
+	int Z;
+	int V;
+	int C;
 	public Instruction(String string, String string2) {
 		Address=string;
 		Value=string2;
