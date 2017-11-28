@@ -1,3 +1,5 @@
+//DOUBT R1 , R2 ,RD values order in CMP,CMN etc. ADC
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,22 +23,22 @@ public class ARMDecoder {
 		
 		/*
 		Opcodes=new HashMap<String,String>();
-		Opcodes.put("0000","AND");
-		Opcodes.put("0001","EOR");
-		Opcodes.put("0010","SUB");
+		Opcodes.put("0000","AND"); 
+		Opcodes.put("0001","EOR"); 
+		Opcodes.put("0010","SUB"); d
 		Opcodes.put("0011","RSB");
-		Opcodes.put("0100","ADD");
-		Opcodes.put("0101","ADC");
+		Opcodes.put("0100","ADD"); d
+		Opcodes.put("0101","ADC"); 
 		Opcodes.put("0110","SBC");
 		Opcodes.put("0111","RSC");
 		Opcodes.put("1000","TST");
 		Opcodes.put("1001","TEQ");
-		Opcodes.put("1010","CMP");
-		Opcodes.put("1011","CMN");
+		Opcodes.put("1010","CMP"); d
+		Opcodes.put("1011","CMN"); d
 		Opcodes.put("1100","ORR");
-		Opcodes.put("1101","MOV");
-		Opcodes.put("1110","BIC");
-		Opcodes.put("1111","MVN"); 
+		Opcodes.put("1101","MOV"); d
+		Opcodes.put("1110","BIC"); 
+		Opcodes.put("1111","MVN"); d
 		Registers=new HashMap<String,Register>();
 		Registers.put("0000",new Register("R0",0L));
 		Registers.put("0001",new Register("R1",0L));
@@ -150,12 +152,13 @@ public class ARMDecoder {
 		System.out.println(Rn);
 		System.out.println(Rd);
 		*/
-				
+		String Imm="";
+		String Rm=null;
 		System.out.print("Operation is "+Opcodes.get(Opcode));
 		System.out.print(" , First Operand is "+Registers.get(Rn));
 		if(I.equals("0")) {
 			String shift=bin.substring(20,28);
-			String Rm=bin.substring(28,32);
+			Rm=bin.substring(28,32);
 			R2=Registers.get(Rm);
 			Read+=", "+R2.show();
 			//System.out.println(shift);
@@ -164,24 +167,128 @@ public class ARMDecoder {
 		}else
 		{
 			String Rotate=bin.substring(20,24);
-			String Imm=bin.substring(24,32);
+			Imm=bin.substring(24,32);
 			//System.out.println(Rotate);
 			//System.out.println(Imm);
 			System.out.print(" , immediate Second Operand is "+Integer.parseInt(Imm, 2));
+			//System.out.println("HELOLLLOOO"+Imm+"HELLO");
 		}
 		System.out.println(" ,Destination Register is "+Registers.get(Rd)+".");
 		
 		System.out.println(Read);
 		
-		Execute();
+		// Pass all elements some maybe null according to instruction type- handled in execute
+		if(Imm!="")    
+		{
+			Execute(Opcode,Registers.get(Rn),Registers.get(Rm),Integer.parseInt(Imm, 2),Registers.get(Rd));
+			//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+Integer.parseInt(Imm, 2)+" "+Registers.get(Rd));
+		}
+		else
+		{
+			Execute(Opcode,Registers.get(Rn),Registers.get(Rm),null,Registers.get(Rd));
+			//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+"NULL"+" "+Registers.get(Rd));
+		}
+				
 		Mem();
 		Writeback(); 
 		
 	}
 	
-	private static void Execute() {
+	private static void Execute(String OC, Register R1, Register R2, Integer Imm,Register RD) 
+	{
 		System.out.println("EXECUTE:");
+		if(Opcodes.get(OC).equals("ADD"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				RD.Value=R1.Value+R2.Value;
+			}	
+			else
+			{
+				RD.Value=R1.Value-Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("SUB"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				RD.Value=R1.Value-R2.Value;
+			}	
+			else
+			{
+				RD.Value=R1.Value-Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("CMP"))
+		{
+			if(R1!=null && R2!=null)
+			{
+				//return RD.Value-R1.Value;
+			}	
+			else
+			{
+				//return RD.Value-Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("CMN"))
+		{
+			if(R1!=null && R2!=null)
+			{
+				// return RD.Value+R1.Value;
+			}	
+			else
+			{
+				// return RD.Value+Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("MOV"))
+		{
+			if(R1!=null && R2!=null)
+			{
+				RD.Value=R1.Value;
+			}	
+			else
+			{
+				RD.Value=Long.valueOf(Imm.longValue());
+			}
+		}
+		if(Opcodes.get(OC).equals("MVN"))
+		{
+			if(R1!=null && R2!=null)
+			{
+				String bin = Long.toBinaryString(~R1.Value);  //complement
+				RD.Value=Long.valueOf(bin);
+			}	
+			else
+			{
+				String bin = Long.toBinaryString(~Long.valueOf(Imm.longValue()));
+				RD.Value=Long.valueOf(bin);
+			}
+		}
+
+		
+		
 		 
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 			
 	}
 	
