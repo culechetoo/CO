@@ -533,13 +533,13 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null)
 			{
-				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
+				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				Writeback(RD,R2.Value);
 				
 			}	
 			else
 			{
-				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
+				System.out.println("Moving "+Imm+" to "+RD.Name);
 				Writeback(RD,Imm);
 			}
 		}
@@ -548,13 +548,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null)
 			{
 				String bin = Integer.toBinaryString(~R2.Value);  //complement
-				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
+				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}	
 			else
 			{
 				String bin = Integer.toBinaryString(~Imm);
-				System.out.println("Not Moving "+R2.Value+" to "+Registers.get(RD));
+				System.out.println("Not Moving "+Imm+" to "+RD.Name);
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}
 		}
