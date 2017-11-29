@@ -319,7 +319,7 @@ public class ARMDecoder {
 					String Offset = bin.substring(8,32);
 					
 					int L=Integer.parseInt(bin.substring(7,8));
-					System.out.println("Operation is BRANCH, Link = "+L+", Offset = "+Integer.valueOf(Offset,2));
+					System.out.println("Operation is BRANCH, Link = "+L+", Offset = "+getTwosComplement(Offset));
 					Branch(L,Offset);
 				}
 			}
