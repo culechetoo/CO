@@ -336,9 +336,9 @@ public class ARMDecoder {
 		if(l==1) 
 			Registers.get("1110").Value=Registers.get("1111").Value;
 			
-		int address=Registers.get("1111").Value+getTwosComplement(offset);
+		int address=Registers.get("1111").Value+getTwosComplement(offset)+2;
 		PC=address;
-		System.out.println("BRANCH to address PC+("+4*getTwosComplement(offset)+")");
+		System.out.println("BRANCH to address PC+4("+4*getTwosComplement(offset)+")");
 		//System.out.println(address);
 		Instruction i=ins.get(address);
 		System.out.println("FETCH: instruction "+i.Value+" from address "+i.Address);
