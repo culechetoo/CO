@@ -23,43 +23,43 @@ public class ARMDecoder {
 	public static int c = 0;
 	public static int v = 0;
 	public static void main(String[] args) {
-		init();
+init();
 		
-		/*
-		Opcodes=new HashMap<String,String>();
-		Opcodes.put("0000","AND"); d
-		Opcodes.put("0001","EOR"); d
-		Opcodes.put("0010","SUB"); d
-		Opcodes.put("0011","RSB"); 
-		Opcodes.put("0100","ADD"); d
-		Opcodes.put("0101","ADC"); 
-		Opcodes.put("0110","SBC");
-		Opcodes.put("0111","RSC");
-		Opcodes.put("1000","TST");
-		Opcodes.put("1001","TEQ");
-		Opcodes.put("1010","CMP"); d
-		Opcodes.put("1011","CMN"); d
-		Opcodes.put("1100","ORR"); d 
-		Opcodes.put("1101","MOV"); d
-		Opcodes.put("1110","BIC"); 
-		Opcodes.put("1111","MVN"); d
-		Registers=new HashMap<String,Register>();
-		Registers.put("0000",new Register("R0",0L));
-		Registers.put("0001",new Register("R1",0L));
-		Registers.put("0010",new Register("R2",0L));
-		Registers.put("0011",new Register("R3",0L));
-		Registers.put("0100",new Register("R4",0L));
-		Registers.put("0101",new Register("R5",0L));
-		Registers.put("0110",new Register("R6",0L));
-		Registers.put("0111",new Register("R7",0L));
-		Registers.put("1000",new Register("R8",0L));
-		Registers.put("1001",new Register("R9",0L));
-		Registers.put("1010",new Register("R10",0L));
-		Registers.put("1011",new Register("R11",0L));
-		Registers.put("1100",new Register("R12",0L));
-		Registers.put("1101",new Register("R13(sp)",0L));
-		Registers.put("1110",new Register("R14(lr)",0L));
-		Registers.put("1111",new Register("R15(pc)",0L));
+//	
+//		Opcodes=new HashMap<String,String>();
+//		Opcodes.put("0000","AND"); 
+//		Opcodes.put("0001","EOR"); 
+//		Opcodes.put("0010","SUB"); 
+//		Opcodes.put("0011","RSB"); 
+//		Opcodes.put("0100","ADD"); 
+//		Opcodes.put("0101","ADC"); 
+//		Opcodes.put("0110","SBC");
+//		Opcodes.put("0111","RSC");
+//		Opcodes.put("1000","TST");
+//		Opcodes.put("1001","TEQ");
+//		Opcodes.put("1010","CMP"); 
+//		Opcodes.put("1011","CMN"); 
+//		Opcodes.put("1100","ORR");  
+//		Opcodes.put("1101","MOV"); 
+//		Opcodes.put("1110","BIC"); 
+//		Opcodes.put("1111","MVN"); 
+//		Registers=new HashMap<String,Register>();
+//		Registers.put("0000",new Register("R0",0));
+//		Registers.put("0001",new Register("R1",0));
+//		Registers.put("0010",new Register("R2",0));
+//		Registers.put("0011",new Register("R3",0));
+//		Registers.put("0100",new Register("R4",0));
+//		Registers.put("0101",new Register("R5",0));
+//		Registers.put("0110",new Register("R6",0));
+//		Registers.put("0111",new Register("R7",0));
+//		Registers.put("1000",new Register("R8",0));
+//		Registers.put("1001",new Register("R9",0));
+//		Registers.put("1010",new Register("R10",0));
+//		Registers.put("1011",new Register("R11",0));
+//		Registers.put("1100",new Register("R12",0));
+//		Registers.put("1101",new Register("R13(sp)",0));
+//		Registers.put("1110",new Register("R14(lr)",0));
+//		Registers.put("1111",new Register("R15(pc)",0));
 		 
 		try
 		{   
@@ -74,7 +74,7 @@ public class ARMDecoder {
 		}         
 		catch(IOException ex)
 		{System.out.println(ex.getMessage());}
-		 */
+		 
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -330,7 +330,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value+Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value+Imm;
 			}
 		}
 		if(Opcodes.get(OC).equals("SUB"))
@@ -341,7 +341,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value-Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value-Imm;
 			}
 		}
 		if(Opcodes.get(OC).equals("CMP"))
@@ -374,20 +374,20 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=Long.valueOf(Imm.longValue());
+				RD.Value=Imm;
 			}
 		}
 		if(Opcodes.get(OC).equals("MVN"))
 		{
 			if(R1!=null && R2!=null)
 			{
-				String bin = Long.toBinaryString(~R1.Value);  //complement
-				RD.Value=Long.valueOf(bin);
+				String bin = Integer.toBinaryString(~R1.Value);  //complement
+				RD.Value=Integer.parseInt(bin, 2);
 			}	
 			else
 			{
-				String bin = Long.toBinaryString(~Long.valueOf(Imm.longValue()));
-				RD.Value=Long.valueOf(bin);
+				String bin = Integer.toBinaryString(~Imm);
+				RD.Value=Integer.parseInt(bin, 2);
 			}
 		}
 		if(Opcodes.get(OC).equals("EOR"))
@@ -398,7 +398,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value^Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value^Imm;
 			}
 		}
 		if(Opcodes.get(OC).equals("ORR"))
@@ -409,7 +409,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value | Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value | Imm;
 			}
 		}
 		if(Opcodes.get(OC).equals("AND"))
@@ -420,7 +420,7 @@ public class ARMDecoder {
 			}	
 			else
 			{
-				RD.Value=R1.Value & Long.valueOf(Imm.longValue());
+				RD.Value=R1.Value & Imm;
 			}
 		}
 		
@@ -521,8 +521,8 @@ class Instruction{
 class Register implements Serializable{
 	private static final long serialVersionUID = 1L;
 	String Name;
-	Long Value;
-	public Register(String string, Long val) {
+	int Value;
+	public Register(String string, int val) {
 		Name=string;
 		Value=val;
 	}
@@ -535,4 +535,3 @@ class Register implements Serializable{
 		return Name;
 	}
 }
-
