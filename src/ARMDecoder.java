@@ -312,7 +312,7 @@ init();
 			}
 					
 			Mem();
-			Writeback(); 
+			 
 		}
 		else {
 			System.out.println("Instruction not executed as conditions failed.");
@@ -326,22 +326,26 @@ init();
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
-				RD.Value=R1.Value+R2.Value;
+				int h=R1.Value+R2.Value;
+				Writeback(RD,h);
 			}	
 			else
 			{
-				RD.Value=R1.Value+Imm;
+				int h=R1.Value+Imm;
+				Writeback(RD,h);
 			}
 		}
 		if(Opcodes.get(OC).equals("SUB"))
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
-				RD.Value=R1.Value-R2.Value;
+				int h=R1.Value-R2.Value;
+				Writeback(RD,h);
 			}	
 			else
 			{
-				RD.Value=R1.Value-Imm;
+				int h=R1.Value-Imm;
+				Writeback(RD,h);
 			}
 		}
 		if(Opcodes.get(OC).equals("CMP"))
@@ -370,11 +374,11 @@ init();
 		{
 			if(R1!=null && R2!=null)
 			{
-				RD.Value=R1.Value;
+				Writeback(RD,R1.Value);
 			}	
 			else
 			{
-				RD.Value=Imm;
+				Writeback(RD,Imm);
 			}
 		}
 		if(Opcodes.get(OC).equals("MVN"))
@@ -382,45 +386,45 @@ init();
 			if(R1!=null && R2!=null)
 			{
 				String bin = Integer.toBinaryString(~R1.Value);  //complement
-				RD.Value=Integer.parseInt(bin, 2);
+				Writeback(RD,Integer.parseInt(bin, 2));
 			}	
 			else
 			{
 				String bin = Integer.toBinaryString(~Imm);
-				RD.Value=Integer.parseInt(bin, 2);
+				Writeback(RD,Integer.parseInt(bin, 2));
 			}
 		}
 		if(Opcodes.get(OC).equals("EOR"))
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
-				RD.Value=R1.Value^R2.Value;
+				Writeback(RD,R1.Value^R2.Value);
 			}	
 			else
 			{
-				RD.Value=R1.Value^Imm;
+				Writeback(RD,R1.Value^Imm);
 			}
 		}
 		if(Opcodes.get(OC).equals("ORR"))
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
-				RD.Value=R1.Value  | R2.Value;
+				Writeback(RD,R1.Value  | R2.Value);
 			}	
 			else
 			{
-				RD.Value=R1.Value | Imm;
+				Writeback(RD,R1.Value | Imm);
 			}
 		}
 		if(Opcodes.get(OC).equals("AND"))
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
-				RD.Value=R1.Value & R2.Value;
+				Writeback(RD,R1.Value & R2.Value);
 			}	
 			else
 			{
-				RD.Value=R1.Value & Imm;
+				Writeback(RD,R1.Value & Imm);
 			}
 		}
 		
@@ -456,9 +460,10 @@ init();
 		
 	}
 	
-	private static void Writeback() {
+	private static void Writeback(Register Rd, int result) 
+	{
 		System.out.println("WRITEBACK:");
-		
+		Rd.Value=result;
 	}
 	
 	private static long calcshift(String r, long a) {
