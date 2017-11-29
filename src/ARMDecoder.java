@@ -113,8 +113,6 @@ public class ARMDecoder {
 				String[] str=line.split(" ");
 				Instruction i=new Instruction(str[0],str[1]);
 				ins.add(i);
-				System.out.println("Fetch instruction "+str[1]+" from address "+str[0]);
-				Decode(i);
 			}   
 			b.close();
 		}
@@ -123,6 +121,11 @@ public class ARMDecoder {
 		}
 		catch(IOException ex) {
 			System.out.println("Error reading file '"+ fileName + "'");                  
+		}
+		
+		for(Instruction i:ins) {
+			System.out.println("Fetch instruction "+i.Value+" from address "+i.Address);
+			Decode(i);
 		}
 		return ins;
 	}
@@ -420,6 +423,7 @@ public class ARMDecoder {
 				RD.Value=R1.Value & Long.valueOf(Imm.longValue());
 			}
 		}
+		
 
 		
 		
