@@ -19,6 +19,7 @@ public class ARMDecoder {
 	static HashMap<String,String> Opcodes;
 	static HashMap<String,Register> Registers;
 	static ArrayList<Instruction> ins;
+	static int[] mem = new int[4096];
 	public static int n = 0;
 	public static int z = 0;
 	public static int c = 0;
@@ -271,7 +272,6 @@ public class ARMDecoder {
 					String S=bin.substring(11,12);
 					String Rn=bin.substring(12,16);
 					String Rd=bin.substring(16,20);
-					//System.out.println(Rn);
 					R1=Registers.get(Rn);
 					String Rm = bin.substring(28,32);
 					Register R2 = new Register(Registers.get(Rm).Name, Registers.get(Rm).Value);
@@ -287,14 +287,13 @@ public class ARMDecoder {
 					String Imm="";
 					System.out.print("Operation is "+Opcodes.get(Opcode));
 					System.out.print(" , First Operand is "+Registers.get(Rn));
-					//int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
+					int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
 					if(I.equals("0")) {
 						Read+=", "+Registers.get(Rm).show();
 						System.out.print(" , Second Operand is "+Registers.get(Rm));
 					}
 					else
 					{
-						int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
 						Imm=bin.substring(24,32);
 						System.out.print(" , immediate Second Operand is "+a);
 					}
@@ -321,6 +320,28 @@ public class ARMDecoder {
 					int L=Integer.parseInt(bin.substring(7,8));
 					System.out.println("Operation is BRANCH, Link = "+L+", Offset = "+getTwosComplement(Offset));
 					Branch(L,Offset);
+				}
+				else if(bin.substring(4,6).equals("01")) {
+					System.out.print("Memory: ");
+					String mode = bin.substring(11);
+					String offset = bin.substring(20,32);
+					int off;
+					if(bin.substring(6).equals("0")) {
+						off = Integer.parseInt(bin.substring(20, 32), 2);
+					}
+					else {
+						off = (new Operand2Calculator(offset, "0")).calcoperand();
+					}
+					if(mode.equals("0")) {
+						String Rn = bin.substring(12,16);
+						mem[off] = Registers.get(Rn).Value;
+						System.out.println(mem[off]+" written to "+off);
+					}
+					else {
+						String Rd = bin.substring(16,20);
+						Writeback(Registers.get(Rd), mem[off]);
+						System.out.println(mem[off]+" from "+offset+" written to Register "+Registers.get(Rd).Name);
+					}
 				}
 			}
 			else {
@@ -396,13 +417,28 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				int h=R1.Value-R2.Value;
-				System.out.println("Subtracting "+R1.Value+" and "+R2.Value);
+				System.out.println("Subtracting "+R2.Value+" from "+R1.Value);
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value-Imm;
-				System.out.println("Subtracting "+R1.Value+" and "+Imm);
+				System.out.println("Subtracting "+Imm+" from "+R1.Value);
+				Writeback(RD,h);
+			}
+		}
+		if(Opcodes.get(OC).equals("RSB"))
+		{
+			if(R1!=null && R2!=null && RD!=null)
+			{
+				int h=R2.Value-R2.Value;
+				System.out.println("Subtracting "+R1.Value+" from "+R2.Value);
+				Writeback(RD,h);
+			}	
+			else
+			{
+				int h=Imm-R1.Value;
+				System.out.println("Subtracting "+R1.Value+" from "+Imm);
 				Writeback(RD,h);
 			}
 		}
@@ -497,13 +533,13 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null)
 			{
-				System.out.println("Moving "+R2.Value+" to "+RD);
+				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
 				Writeback(RD,R2.Value);
 				
 			}	
 			else
 			{
-				System.out.println("Moving "+Imm+" to "+RD);
+				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
 				Writeback(RD,Imm);
 			}
 		}
@@ -512,13 +548,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null)
 			{
 				String bin = Integer.toBinaryString(~R2.Value);  //complement
-				System.out.println("Moving "+R2.Value+" to "+RD);
+				System.out.println("Moving "+R2.Value+" to "+Registers.get(RD));
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}	
 			else
 			{
 				String bin = Integer.toBinaryString(~Imm);
-				System.out.println("Not Moving "+Imm+" to "+RD);
+				System.out.println("Not Moving "+R2.Value+" to "+Registers.get(RD));
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}
 		}
@@ -605,17 +641,10 @@ public class ARMDecoder {
 		
 			
 	}
-
-	
-	private static void Mem() {
-		System.out.println("MEMORY:");
-		
-	}
-	
 	private static void Writeback(Register Rd, int result) 
 	{
 		Rd.Value=result;
-		System.out.println("WRITEBACK: "+Rd.Name+" "+result);
+		System.out.println("WRITEBACK: "+result+" written to "+Rd.Name);
 	}
 		
 }
