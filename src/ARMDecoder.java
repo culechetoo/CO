@@ -23,16 +23,15 @@ public class ARMDecoder {
 	public static int c = 0;
 	public static int v = 0;
 	public static void main(String[] args) {
-init();
+		init();
 		
-//	
 //		Opcodes=new HashMap<String,String>();
 //		Opcodes.put("0000","AND"); 
 //		Opcodes.put("0001","EOR"); 
 //		Opcodes.put("0010","SUB"); 
 //		Opcodes.put("0011","RSB"); 
 //		Opcodes.put("0100","ADD"); 
-//		Opcodes.put("0101","ADC"); 
+//    	Opcodes.put("0101","ADC"); 
 //		Opcodes.put("0110","SBC");
 //		Opcodes.put("0111","RSC");
 //		Opcodes.put("1000","TST");
@@ -249,73 +248,88 @@ init();
 			}
 		}
 		if(execute) {
-			Register R1=null;
-			Register R2=null;
-			Register R3=null;
-			String Read="";
-			//String binrev=new StringBuilder(bin).reverse().toString();
-			//System.out.println(binrev);
-			
-			//System.out.println(bin);
-			String I=bin.substring(6,7);
-			String Opcode=bin.substring(7,11);
-			String S=bin.substring(11,12);
-			String Rn=bin.substring(12,16);
-			String Rd=bin.substring(16,20);
-			R1=Registers.get(Rn);
-			R3=Registers.get(Rd);
-			Read+="Read Registers: "+R1.show();
-			/*
-			System.out.println(Cond);
-			System.out.println(I);
-			System.out.println(Opcode);
-			System.out.println(S);
-			System.out.println(Rn);
-			System.out.println(Rd);
-			*/
-			String Imm="";
-			String Rm=null;
-			System.out.print("Operation is "+Opcodes.get(Opcode));
-			System.out.print(" , First Operand is "+Registers.get(Rn));
-			if(I.equals("0")) {
-				String shift=bin.substring(20,28);
-				Rm = bin.substring(28,32);
-				R2=Registers.get(Rm);
-				Read+=", "+R2.show();
-				//System.out.println(shift);
-				//System.out.println(Rm);
-				System.out.print(" , Second Operand is "+Registers.get(Rm));
-			}else
-			{
-				String Rotate=bin.substring(20,24);
-				Imm=bin.substring(24,32);
-				Imm = rotate(Rotate, Imm);
-				//System.out.println(Rotate);
-				//System.out.println(Imm);
-				System.out.print(" , immediate Second Operand is "+Integer.parseInt(Imm, 2));
-				//System.out.println("HELOLLLOOO"+Imm+"HELLO");
+			if(bin.substring(4,6).equals("00")) {
+				Register R1=null;
+				Register R2=null;
+				Register R3=null;
+				String Read="";
+				//String binrev=new StringBuilder(bin).reverse().toString();
+				//System.out.println(binrev);
+				
+				//System.out.println(bin.substring(8,32).length());
+				String I=bin.substring(6,7);
+				String Opcode=bin.substring(7,11);
+				String S=bin.substring(11,12);
+				String Rn=bin.substring(12,16);
+				String Rd=bin.substring(16,20);
+				R1=Registers.get(Rn);
+				R3=Registers.get(Rd);
+				Read+="Read Registers: "+R1.show();
+				/*
+				System.out.println(Cond);
+				System.out.println(I);
+				System.out.println(Opcode);
+				System.out.println(S);
+				System.out.println(Rn);
+				System.out.println(Rd);
+				*/
+				String Imm="";
+				String Rm=null;
+				System.out.print("Operation is "+Opcodes.get(Opcode));
+				System.out.print(" , First Operand is "+Registers.get(Rn));
+				if(I.equals("0")) {
+					String shift=bin.substring(20,28);
+					Rm = bin.substring(28,32);
+					R2=Registers.get(Rm);
+					Read+=", "+R2.show();
+					//System.out.println(shift);
+					//System.out.println(Rm);
+					System.out.print(" , Second Operand is "+Registers.get(Rm));
+				}else
+				{
+					String Rotate=bin.substring(20,24);
+					Imm=bin.substring(24,32);
+					Imm = rotate(Rotate, Imm);
+					//System.out.println(Rotate);
+					//System.out.println(Imm);
+					System.out.print(" , immediate Second Operand is "+Integer.parseInt(Imm, 2));
+					//System.out.println("HELOLLLOOO"+Imm+"HELLO");
+				}
+				System.out.println(" ,Destination Register is "+Registers.get(Rd)+".");
+				
+				System.out.println(Read);
+				
+				// Pass all elements some maybe null according to instruction type- handled in execute
+				if(Imm!="")    
+				{
+					Execute(Opcode,Registers.get(Rn),Registers.get(Rm),Integer.parseInt(Imm, 2),Registers.get(Rd),S);
+					//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+Integer.parseInt(Imm, 2)+" "+Registers.get(Rd));
+				}
+				else
+				{
+					Execute(Opcode,Registers.get(Rn),Registers.get(Rm),null,Registers.get(Rd), S);
+					//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+"NULL"+" "+Registers.get(Rd));
+				}
 			}
-			System.out.println(" ,Destination Register is "+Registers.get(Rd)+".");
-			
-			System.out.println(Read);
-			
-			// Pass all elements some maybe null according to instruction type- handled in execute
-			if(Imm!="")    
+			else if(bin.substring(4,7).equals("101"))
 			{
-				Execute(Opcode,Registers.get(Rn),Registers.get(Rm),Integer.parseInt(Imm, 2),Registers.get(Rd),S);
-				//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+Integer.parseInt(Imm, 2)+" "+Registers.get(Rd));
+				String Offset = bin.substring(8,32);
+				
+				int L=Integer.valueOf(bin.charAt(7));
+				Branch(L,Offset);
 			}
-			else
-			{
-				Execute(Opcode,Registers.get(Rn),Registers.get(Rm),null,Registers.get(Rd), S);
-				//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+"NULL"+" "+Registers.get(Rd));
-			}
-					
-			Mem();
-			 
 		}
 		else {
 			System.out.println("Instruction not executed as conditions failed.");
+		}
+	}
+	
+	private static void Branch(int l, String offset) {
+		if(l==0) {
+			
+		}
+		else {
+			Registers.get("R14").Value=Registers.get("R15").Value;
 		}
 	}
 	
