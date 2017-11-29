@@ -12,8 +12,7 @@ public class Operand2Calculator {
 			return rotate(st.substring(0, 4), st.substring(4,12));
 		}
 		else {
-			return Integer.parseInt(st.substring(8, 12), 2);
-			//return shift(st.substring(0, 8), Integer.parseInt(st.substring(8, 12), 2));
+			return shift(st.substring(0, 8), Integer.parseInt(st.substring(8, 12), 2));
 		}
 	}
 	private int rotate(String r, String i) {

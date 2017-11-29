@@ -271,7 +271,7 @@ public class ARMDecoder {
 					String S=bin.substring(11,12);
 					String Rn=bin.substring(12,16);
 					String Rd=bin.substring(16,20);
-					System.out.println(Rn);
+					//System.out.println(Rn);
 					R1=Registers.get(Rn);
 					String Rm = bin.substring(28,32);
 					Register R2 = new Register(Registers.get(Rm).Name, Registers.get(Rm).Value);
@@ -381,13 +381,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				int h=R1.Value+R2.Value;
-				System.out.println("ADD "+R1.Value+" and "+R2.Value+" ");
+				System.out.println("Adding "+R1.Value+" "+R2.Value);
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value+Imm;
-				System.out.println("ADD "+R1.Value+" and "+Imm);
+				System.out.println("Adding "+R1.Value+" and "+Imm);
 				Writeback(RD,h);
 			}
 		}
@@ -396,11 +396,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				int h=R1.Value-R2.Value;
+				System.out.println("Subtracting "+R1.Value+" and "+R2.Value);
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value-Imm;
+				System.out.println("Subtracting "+R1.Value+" and "+Imm);
 				Writeback(RD,h);
 			}
 		}
@@ -422,8 +424,8 @@ public class ARMDecoder {
 				{
 					z=0;
 					n=0;
-					
 				}
+				System.out.println("Comparing "+R1.Value+" and "+R2.Value);
 			}	
 			else
 			{
@@ -443,6 +445,7 @@ public class ARMDecoder {
 					n=0;
 					
 				}
+				System.out.println("Comparing "+R1.Value+" and "+Imm);
 			}
 		}
 		
@@ -467,6 +470,7 @@ public class ARMDecoder {
 					n=0;
 					
 				}
+				System.out.println("Not Comparing "+R1.Value+" and "+R2.Value);
 			}	
 			else
 			{
@@ -486,16 +490,20 @@ public class ARMDecoder {
 					n=0;
 					
 				}
+				System.out.println("Not Comparing "+R1.Value+" and "+Imm);
 			}
 		}
 		if(Opcodes.get(OC).equals("MOV"))
 		{
 			if(R1!=null && R2!=null)
 			{
+				System.out.println("Moving "+R2.Value+" to "+RD);
 				Writeback(RD,R2.Value);
+				
 			}	
 			else
 			{
+				System.out.println("Moving "+Imm+" to "+RD);
 				Writeback(RD,Imm);
 			}
 		}
@@ -503,12 +511,14 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null)
 			{
-				String bin = Integer.toBinaryString(~R1.Value);  //complement
+				String bin = Integer.toBinaryString(~R2.Value);  //complement
+				System.out.println("Moving "+R2.Value+" to "+RD);
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}	
 			else
 			{
 				String bin = Integer.toBinaryString(~Imm);
+				System.out.println("Not Moving "+Imm+" to "+RD);
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}
 		}
@@ -516,10 +526,12 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
+				System.out.println("Exor "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value^R2.Value);
 			}	
 			else
 			{
+				System.out.println("Exor "+R1.Value+" and "+ Imm);
 				Writeback(RD,R1.Value^Imm);
 			}
 		}
@@ -527,10 +539,12 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
+				System.out.println("OR "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value  | R2.Value);
 			}	
 			else
 			{
+				System.out.println("OR "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value | Imm);
 			}
 		}
@@ -538,10 +552,12 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
+				System.out.println("And "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value & R2.Value);
 			}	
 			else
 			{
+				System.out.println("And "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value & Imm);
 			}
 		}
@@ -551,12 +567,14 @@ public class ARMDecoder {
 			{
 				String h=Integer.toBinaryString(~R2.Value);
 				int g=Integer.parseInt(h, 2);
+				System.out.println("BIC "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value & g);
 			}	
 			else
 			{
 				String h=Integer.toBinaryString(~Imm);
 				int g=Integer.parseInt(h, 2);
+				System.out.println("BIC "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value & g);
 			}
 		}
@@ -587,6 +605,7 @@ public class ARMDecoder {
 		
 			
 	}
+
 	
 	private static void Mem() {
 		System.out.println("MEMORY:");
