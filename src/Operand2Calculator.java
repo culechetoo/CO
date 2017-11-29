@@ -12,7 +12,8 @@ public class Operand2Calculator {
 			return rotate(st.substring(0, 4), st.substring(4,12));
 		}
 		else {
-			return shift(st.substring(0, 8), Integer.parseInt(new BigInteger(st.substring(8, 12),2).toString(2)));
+			return Integer.parseInt(st.substring(8, 12), 2);
+			//return shift(st.substring(0, 8), Integer.parseInt(st.substring(8, 12), 2));
 		}
 	}
 	private int rotate(String r, String i) {
@@ -20,7 +21,7 @@ public class Operand2Calculator {
 		int rotate = Integer.parseInt(value);
 		String newstring = "";
 		if(rotate==0) {
-			return Integer.parseInt(new BigInteger(i, 2).toString(2));
+			return Integer.parseInt(i, 2);
 		}
 		if(rotate<4) {
 			String a = i.substring(0, 2*rotate);
@@ -36,10 +37,10 @@ public class Operand2Calculator {
 				newstring = newstring + "00";
 			}
 		}
-		return Integer.parseInt(new BigInteger(newstring,2).toString(2));
+		return Integer.parseInt(newstring, 2);
 	}
 	private int shift(String r, int a) {
-		int shift = Integer.parseInt(new BigInteger(r.substring(0,5),2).toString(2));
+		int shift = Integer.parseInt(r.substring(0,5), 2);
 		if(r.substring(7, 8).equals("0")) {
 			String type = r.substring(5,7);
 			if(type.equals("00")) {	
@@ -53,7 +54,7 @@ public class Operand2Calculator {
 				for(int i = 0; i<shift; i++) {
 					c = c+"0";
 				}
-				return Integer.parseInt(new BigInteger(c,2).toString(2));
+				return Integer.parseInt(c, 2);
 			}
 			else if(type.equals("01")) {
 				return a>>>shift;

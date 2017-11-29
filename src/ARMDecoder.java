@@ -287,14 +287,14 @@ public class ARMDecoder {
 					String Imm="";
 					System.out.print("Operation is "+Opcodes.get(Opcode));
 					System.out.print(" , First Operand is "+Registers.get(Rn));
-					int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
+					//int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
 					if(I.equals("0")) {
 						Read+=", "+Registers.get(Rm).show();
-						R2.Value = a;
 						System.out.print(" , Second Operand is "+Registers.get(Rm));
 					}
 					else
 					{
+						int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
 						Imm=bin.substring(24,32);
 						System.out.print(" , immediate Second Operand is "+a);
 					}
@@ -381,11 +381,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				int h=R1.Value+R2.Value;
+				System.out.println("ADD "+R1.Value+" and "+R2.Value+" ");
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value+Imm;
+				System.out.println("ADD "+R1.Value+" and "+Imm);
 				Writeback(RD,h);
 			}
 		}
@@ -490,7 +492,7 @@ public class ARMDecoder {
 		{
 			if(R1!=null && R2!=null)
 			{
-				Writeback(RD,R1.Value);
+				Writeback(RD,R2.Value);
 			}	
 			else
 			{
@@ -593,52 +595,10 @@ public class ARMDecoder {
 	
 	private static void Writeback(Register Rd, int result) 
 	{
-		System.out.println("WRITEBACK:");
 		Rd.Value=result;
+		System.out.println("WRITEBACK: "+Rd.Name+" "+result);
 	}
-	
-	private static long calcshift(String r, long a) {
-		int shift;
-		if(r.substring(7, 8).equals("0")) {
-			String type = r.substring(5,7);
-			if(type.equals("00")) {
-				shift = Integer.valueOf(new BigInteger(r.substring(0,5),16).toString(2));
-				
-			}
-			else if(type.equals("01")) {
-				shift = 1/(Integer.valueOf(new BigInteger(r.substring(0,5),16).toString(2)));
-			}
-			else if(type.equals("10")) {
-				
-			}
-		}
-		return 1;
-	}
-	
-	private static String rotate(String r, String i) {
-		String value = new BigInteger(r, 16).toString(2);
-		int rotate = Integer.valueOf(value);
-		String newstring = "";
-		if(rotate==0) {
-			return i;
-		}
-		if(rotate<4) {
-			String a = i.substring(0, 2*rotate);
-			String b = i.substring(rotate*2, 8);
-			newstring = b+"000000000000000000000000"+a;
-		}
-		else {
-			for(int j = 0; j<rotate-4; j++) {
-				newstring = newstring + "00";
-			}
-			newstring = newstring + i;
-			for(int j = 0; j<(12-(rotate-4)); j++) {
-				newstring = newstring + "00";
-			}
-		}
-		return newstring;
-	}
-	
+		
 }
 
 class Instruction{
