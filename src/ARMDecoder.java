@@ -31,7 +31,7 @@ public class ARMDecoder {
 	public static void main(String[] args) {
 		reader= new BufferedReader(new InputStreamReader(System.in));
 		init();
-		
+//		System.out.println(Registers.get("0010").Value);
 //		Opcodes=new HashMap<String,String>();
 //		Opcodes.put("0000","AND"); 
 //		Opcodes.put("0001","EOR"); 
@@ -142,7 +142,7 @@ public class ARMDecoder {
 		Registers.get("1111").Value=PC;
 		if(instr.Value.equals("0xEF000011")) {
 			finished = true;
-			System.out.println("MEMORY: No memory operation\nEXIT:");
+			System.out.println("MEMORY: No memory operation\nEXIT");
 		}
 		else {
 			System.out.println("DECODE:");
@@ -293,7 +293,8 @@ public class ARMDecoder {
 					System.out.print("Operation is "+Opcodes.get(Opcode));
 					System.out.print(" , First Operand is "+Registers.get(Rn));
 					int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
-					if(I.equals("0")) {
+					if(I.equals("0")) 
+					{
 						Read+=", "+Registers.get(Rm).show();
 						System.out.print(" , Second Operand is "+Registers.get(Rm));
 					}
@@ -443,6 +444,25 @@ public class ARMDecoder {
 				System.out.println("Adding "+R1.Value+" and "+Imm);
 				Writeback(RD,h);
 			}
+			if(s.equals("1"))
+			{
+				if(RD.Value<0)
+				{
+					n=1;
+					z=0;
+				}
+				else if(RD.Value==0)
+				{
+					z=1;
+					n=0;	
+				}
+				else
+				{
+					z=0;
+					n=0;
+				}
+				
+			}
 		}
 		if(Opcodes.get(OC).equals("SUB"))
 		{
@@ -457,6 +477,25 @@ public class ARMDecoder {
 				int h=R1.Value-Imm;
 				System.out.println("Subtracting "+Imm+" from "+R1.Value);
 				Writeback(RD,h);
+			}
+			if(s.equals("1"))
+			{
+				if(RD.Value<0)
+				{
+					n=1;
+					z=0;
+				}
+				else if(RD.Value==0)
+				{
+					z=1;
+					n=0;	
+				}
+				else
+				{
+					z=0;
+					n=0;
+				}
+				
 			}
 		}
 		if(Opcodes.get(OC).equals("RSB"))
@@ -645,33 +684,7 @@ public class ARMDecoder {
 				System.out.println("BIC "+R1.Value+" and "+ R2.Value);
 				Writeback(RD,R1.Value & g);
 			}
-		}
-		
-
-		
-		
-		 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-			
+		}		
 	}
 	private static void Writeback(Register Rd, int result) 
 	{
