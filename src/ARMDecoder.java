@@ -128,15 +128,15 @@ public class ARMDecoder {
 		}
 		PC=0;
 		while(!finished) {
+			System.out.println();
 			System.out.println("FETCH:\nInstruction "+ins.get(PC).Value+" from address "+ins.get(PC).Address);
-			Registers.get("1111").Value=PC;
 			Decode(ins.get(PC));
-			PC++;
 		}
 		return ins;
 	}
 	
 	private static void Decode(Instruction instr) {
+		Registers.get("1111").Value=PC;
 		if(instr.Value.equals("0xEF000011")) {
 			finished = true;
 			System.out.println("MEMORY: No memory operation\nEXIT:");
@@ -260,7 +260,9 @@ public class ARMDecoder {
 				}
 			}
 			if(execute) {
+				
 				if(bin.substring(4,6).equals("00")) {
+					PC++;
 					Register R1;
 					String Read="";
 					//String binrev=new StringBuilder(bin).reverse().toString();
@@ -322,8 +324,11 @@ public class ARMDecoder {
 					Branch(L,Offset);
 				}
 				else if(bin.substring(4,6).equals("01")) {
+					System.out.println("Memory Function");
+					PC++;
 					System.out.print("Memory: ");
-					String mode = bin.substring(11);
+					String mode = bin.substring(11, 16);
+					int a = Integer.parseInt(mode, 2);
 					String offset = bin.substring(20,32);
 					int off;
 					if(bin.substring(6).equals("0")) {
@@ -332,22 +337,24 @@ public class ARMDecoder {
 					else {
 						off = (new Operand2Calculator(offset, "0")).calcoperand();
 					}
-					if(mode.equals("0")) {
+					if(a==24) {
 						String Rn = bin.substring(12,16);
 						mem[off] = Registers.get(Rn).Value;
 						System.out.println(mem[off]+" written to "+off);
 					}
-					else {
+					else if(a==25){
 						String Rd = bin.substring(16,20);
+						System.out.println(mem[off]+" from "+off+" written to Register "+Registers.get(Rd).Name);
 						Writeback(Registers.get(Rd), mem[off]);
-						System.out.println(mem[off]+" from "+offset+" written to Register "+Registers.get(Rd).Name);
 					}
 				}
 			}
 			else {
+				PC++;
 				System.out.println("Instruction not executed as conditions failed.");
 			}
 		}
+		
 	}
 	
 	private static void Branch(int l, String offset) {
@@ -355,13 +362,13 @@ public class ARMDecoder {
 		//System.out.println(Registers.get("1111").Value+" "+getTwosComplement(bin)+" "+getTwosComplement(offset));
 		System.out.println("EXECUTE:");
 		if(l==1) 
-			Registers.get("1110").Value=Registers.get("1111").Value;
+			Registers.get("1110").Value=PC;
 			
-		int address=Registers.get("1111").Value+getTwosComplement(offset)+2;
+		int address=PC+getTwosComplement(offset)+2;
 		PC=address;
 		System.out.println("BRANCH to address PC+4("+4*getTwosComplement(offset)+")");
-		//System.out.println(address);
-		Instruction i=ins.get(address);
+		System.out.println(address);
+		Instruction i=ins.get(PC);
 		System.out.println("FETCH: instruction "+i.Value+" from address "+i.Address);
 		Decode(i);
 	}
