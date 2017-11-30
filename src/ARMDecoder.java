@@ -352,14 +352,14 @@ public class ARMDecoder {
 						Writeback(Registers.get(Rd), mem[off]);
 					}
 				}
-				else if(bin.substring(4,6).equals("1111")) {
-					if(bin.endsWith("6B")|bin.endsWith("6b")) {
+				else if(bin.substring(4,8).equals("1111")) {
+					if(instr.Value.endsWith("6B")|instr.Value.endsWith("6b")) {
 						System.out.println("Instruction is write int.\nRead Registers:"+Registers.get("0001").show()+"\nEXECUTE:");
 						if(Registers.get("0000").Value==1)
 							System.out.println("Writing to Console: "+Registers.get("0001").Value);
 						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
 					}
-					else if(bin.endsWith("6c")|bin.endsWith("6C")) {
+					else if(instr.Value.endsWith("6c")|instr.Value.endsWith("6C")) {
 						System.out.println("Instruction is read int \nEXECUTE:");
 						int n=0;
 						System.out.println("Reading from Console: ");
@@ -368,7 +368,7 @@ public class ARMDecoder {
 						System.out.println("MEMORY:\nNo memory operation");
 						Writeback(Registers.get("0000"),n);
 					}
-					else if(bin.endsWith("00")) {
+					else if(instr.Value.endsWith("00")) {
 						System.out.println("Instruction is write char.\nRead Registers:"+Registers.get("0000").show()+"\nEXECUTE:");
 						System.out.println("Writing to Console: "+(char)Registers.get("0000").Value);
 						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
