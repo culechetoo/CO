@@ -278,61 +278,74 @@ public class ARMDecoder {
 					execute = false;
 				}
 			}
-			if(execute) {
-				
+			if(execute) {	
 				if(bin.substring(4,6).equals("00")) {
-					PC++;
-					Register R1;
-					String Read="";
-					//String binrev=new StringBuilder(bin).reverse().toString();
-					//System.out.println(binrev);
-					
-					//System.out.println(bin.substring(8,32).length());
-					String I=bin.substring(6,7);
-					String Opcode=bin.substring(7,11);
-					String S=bin.substring(11,12);
-					String Rn=bin.substring(12,16);
-					String Rd=bin.substring(16,20);
-					R1=Registers.get(Rn);
-					String Rm = bin.substring(28,32);
-					Register R2 = new Register(Registers.get(Rm).Name, Registers.get(Rm).Value);
-					Read+="Read Registers: "+Registers.get(Rn).show();
-					/*
-					System.out.println(Cond);
-					System.out.println(I);
-					System.out.println(Opcode);
-					System.out.println(S);
-					System.out.println(Rn);
-					System.out.println(Rd);
-					*/
-					String Imm="";
-					System.out.print("Operation is "+Opcodes.get(Opcode)+condflag);
-					System.out.print(" , First Operand is "+Registers.get(Rn));
-					int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
-					if(I.equals("0")) 
-					{
-						Read+=", "+Registers.get(Rm).show();
-						System.out.print(" , Second Operand is "+Registers.get(Rm));
+					if(bin.substring(24, 28).equals("1001")) {
+						String Rd = bin.substring(12, 16);
+						String Rn = bin.substring(16, 20);
+						String Rs = bin.substring(20, 24);
+						String Rm = bin.substring(28, 32);
+						if(bin.substring(10).equals("1")) {
+							Registers.get(Rd).Value = Registers.get(Rm).Value*Registers.get(Rs).Value+Registers.get(Rn).Value;
+						}
+						else {
+							Registers.get(Rd).Value = Registers.get(Rm).Value*Registers.get(Rs).Value;
+						}
 					}
-					else
-					{
-						Imm=bin.substring(24,32);
-						System.out.print(" , immediate Second Operand is "+a);
-					}
-					System.out.println(" ,Destination Register is "+Registers.get(Rd)+".");
-					
-					System.out.println(Read);
-					
-					// Pass all elements some maybe null according to instruction type- handled in execute
-					if(Imm!="")    
-					{
-						Execute(Opcode,R1,null,Integer.parseInt(Imm, 2),Registers.get(Rd),S);
-						//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+Integer.parseInt(Imm, 2)+" "+Registers.get(Rd));
-					}
-					else
-					{
-						Execute(Opcode,R1,R2,null,Registers.get(Rd), S);
-						//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+"NULL"+" "+Registers.get(Rd));
+					else {
+						PC++;
+						Register R1;
+						String Read="";
+						//String binrev=new StringBuilder(bin).reverse().toString();
+						//System.out.println(binrev);
+						
+						//System.out.println(bin.substring(8,32).length());
+						String I=bin.substring(6,7);
+						String Opcode=bin.substring(7,11);
+						String S=bin.substring(11,12);
+						String Rn=bin.substring(12,16);
+						String Rd=bin.substring(16,20);
+						R1=Registers.get(Rn);
+						String Rm = bin.substring(28,32);
+						Register R2 = new Register(Registers.get(Rm).Name, Registers.get(Rm).Value);
+						Read+="Read Registers: "+Registers.get(Rn).show();
+						/*
+						System.out.println(Cond);
+						System.out.println(I);
+						System.out.println(Opcode);
+						System.out.println(S);
+						System.out.println(Rn);
+						System.out.println(Rd);
+						*/
+						String Imm="";
+						System.out.print("Operation is "+Opcodes.get(Opcode)+condflag);
+						System.out.print(" , First Operand is "+Registers.get(Rn));
+						int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
+						if(I.equals("0")) 
+						{
+							Read+=", "+Registers.get(Rm).show();
+							System.out.print(" , Second Operand is "+Registers.get(Rm));
+						}
+						else
+						{
+							Imm=bin.substring(24,32);
+							System.out.print(" , immediate Second Operand is "+a);
+						}
+						System.out.println(" ,Destination Register is "+Registers.get(Rd)+".");
+						
+						System.out.println(Read);
+						
+						// Pass all elements some maybe null according to instruction type- handled in execute
+						if(Imm!="")    
+						{
+							Execute(Opcode,R1,null,Integer.parseInt(Imm, 2),Registers.get(Rd),S);
+							//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+Integer.parseInt(Imm, 2)+" "+Registers.get(Rd));
+						}
+						else
+						{
+							Execute(Opcode,R1,R2,null,Registers.get(Rd), S);
+							//System.out.println(Opcode+" "+Registers.get(Rn)+" "+Registers.get(Rm)+" "+"NULL"+" "+Registers.get(Rd));
+						}
 					}
 				}
 				else if(bin.substring(4,7).equals("101"))
@@ -397,16 +410,14 @@ public class ARMDecoder {
 				PC++;
 				System.out.println("Instruction not executed as conditions failed.");
 			}
-		}
-		
+		}	
 	}
 	
 	private static void Branch(int l, String offset) {
-		String bin=String.format("%32s", offset).replace(" ", "0");
 		//System.out.println(Registers.get("1111").Value+" "+getTwosComplement(bin)+" "+getTwosComplement(offset));
 		System.out.print("EXECUTE: ");
 		if(l==1) 
-			Registers.get("1110").Value=PC;
+			Registers.get("1110").Value=PC+1;
 			
 		int address=PC+getTwosComplement(offset)+2;
 		PC=address;
@@ -420,21 +431,12 @@ public class ARMDecoder {
 	}
 	
 	public static int getTwosComplement(String binaryInt) {
-	    //Check if the number is negative.
-	    //We know it's negative if it starts with a 1
 	    if (binaryInt.charAt(0) == '1') {
-	        //Call our invert digits method
 	        String invertedInt = invertDigits(binaryInt);
-	        //Change this to decimal format.
 	        int decimalValue = Integer.parseInt(invertedInt, 2);
-	        //Add 1 to the curernt decimal and multiply it by -1
-	        //because we know it's a negative number
 	        decimalValue = (decimalValue + 1) * -1;
-	        //return the final result
 	        return decimalValue;
 	    } else {
-	        //Else we know it's a positive number, so just convert
-	        //the number to decimal base.
 	        return Integer.parseInt(binaryInt, 2);
 	    }
 	}
@@ -642,13 +644,18 @@ public class ARMDecoder {
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R2.Value);
-				
+				if(RD.Name=="1111") {
+					PC = RD.Value/4+1;
+				}
 			}	
 			else
 			{
 				System.out.println("Moving "+Imm+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Imm);
+				if(RD.Name=="1111") {
+					PC = RD.Value/4+1;
+				}
 			}
 		}
 		if(Opcodes.get(OC).equals("MVN"))
@@ -659,6 +666,9 @@ public class ARMDecoder {
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
+				if(RD.Name=="1111") {
+					PC = RD.Value/4+1;
+				}
 			}	
 			else
 			{
@@ -666,6 +676,9 @@ public class ARMDecoder {
 				System.out.println("Not Moving "+Imm+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
+				if(RD.Name=="1111") {
+					PC = RD.Value/4+1;
+				}
 			}
 		}
 		if(Opcodes.get(OC).equals("EOR"))
