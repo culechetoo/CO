@@ -353,6 +353,7 @@ public class ARMDecoder {
 					}
 				}
 				else if(bin.substring(4,8).equals("1111")) {
+					PC++;
 					if(instr.Value.endsWith("6B")|instr.Value.endsWith("6b")) {
 						System.out.println("Instruction is write int.\nRead Registers:"+Registers.get("0001").show()+"\nEXECUTE:");
 						if(Registers.get("0000").Value==1)
