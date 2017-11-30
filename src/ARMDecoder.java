@@ -287,12 +287,18 @@ public class ARMDecoder {
 						String Rm = bin.substring(28, 32);
 						int result;
 						if(bin.substring(10).equals("1")) {
-							System.out.println("Operation is MLA"+condflag+", First Operand is "+Registers.get(Rm));
+							System.out.println("Operation is MLA"+condflag+", First Operand is "+Registers.get(Rm)+", Second Operand is "+Registers.get(Rs)+", Third Operand is "+Registers.get(Rn)+", Destination Register is "+Registers.get(Rd));
+							System.out.println("Read Registers: "+Registers.get(Rm)+" "+Registers.get(Rm).Value+", "+Registers.get(Rs)+" "+Registers.get(Rs).Value+", "+Registers.get(Rn)+" "+Registers.get(Rn).Value+", ");
+							System.out.println("EXECUTE: Multiplying "+Registers.get(Rm).Value+" "+Registers.get(Rs).Value+" and Accumulating "+Registers.get(Rn).Value);
 							result = Registers.get(Rm).Value*Registers.get(Rs).Value+Registers.get(Rn).Value;		
 						}
 						else {
+							System.out.println("Operation is MUL"+condflag+", First Operand is "+Registers.get(Rm)+", Second Operand is "+Registers.get(Rs)+", Destination Register is "+Registers.get(Rd));
+							System.out.println("Read Registers: "+Registers.get(Rm)+" "+Registers.get(Rm).Value+", "+Registers.get(Rs)+" "+Registers.get(Rs).Value+", ");
+							System.out.println("EXECUTE: Multiplying "+Registers.get(Rm).Value+" "+Registers.get(Rs).Value);
 							result = Registers.get(Rm).Value*Registers.get(Rs).Value;
 						}
+						System.out.println("MEMORY: No Memory Operation.");
 						Writeback(Registers.get(Rd), result);
 					}
 					else {
