@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -26,7 +27,9 @@ public class ARMDecoder {
 	public static int v = 0;
 	private static boolean finished=false;
 	static int PC;
+	static BufferedReader reader;
 	public static void main(String[] args) {
+		reader= new BufferedReader(new InputStreamReader(System.in));
 		init();
 		
 //		Opcodes=new HashMap<String,String>();
@@ -346,6 +349,28 @@ public class ARMDecoder {
 						String Rd = bin.substring(16,20);
 						System.out.println(mem[off]+" from "+off+" written to Register "+Registers.get(Rd).Name);
 						Writeback(Registers.get(Rd), mem[off]);
+					}
+				}
+				else if(bin.substring(4,6).equals("1111")) {
+					if(bin.endsWith("6B")|bin.endsWith("6b")) {
+						System.out.println("Instruction is write int.\nRead Registers:"+Registers.get("0001").show()+"\nEXECUTE:");
+						if(Registers.get("0000").Value==1)
+							System.out.println("Writing to Console: "+Registers.get("0001").Value);
+						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
+					}
+					else if(bin.endsWith("6c")|bin.endsWith("6C")) {
+						System.out.println("Instruction is read int \nEXECUTE:");
+						int n=0;
+						System.out.println("Reading from Console: ");
+						if(Registers.get("0000").Value==0)
+							try {n=Integer.parseInt(reader.readLine());}catch (NumberFormatException | IOException e ) {e.printStackTrace();}
+						System.out.println("MEMORY:\nNo memory operation");
+						Writeback(Registers.get("0000"),n);
+					}
+					else if(bin.endsWith("00")) {
+						System.out.println("Instruction is write char.\nRead Registers:"+Registers.get("0000").show()+"\nEXECUTE:");
+						System.out.println("Writing to Console: "+(char)Registers.get("0000").Value);
+						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
 					}
 				}
 			}
