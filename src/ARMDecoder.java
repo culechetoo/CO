@@ -25,6 +25,7 @@ public class ARMDecoder {
 	public static int z = 0;
 	public static int c = 0;
 	public static int v = 0;
+	public static String condflag = "";
 	private static boolean finished=false;
 	static int PC;
 	static BufferedReader reader;
@@ -132,20 +133,21 @@ public class ARMDecoder {
 		PC=0;
 		while(!finished) {
 			System.out.println();
-			System.out.println("FETCH:\nInstruction "+ins.get(PC).Value+" from address "+ins.get(PC).Address);
+			System.out.println("FETCH: Instruction "+ins.get(PC).Value+" from address "+ins.get(PC).Address);
 			Decode(ins.get(PC));
 		}
 		return ins;
 	}
 	
 	private static void Decode(Instruction instr) {
+		condflag = "";
 		Registers.get("1111").Value=PC;
 		if(instr.Value.equals("0xEF000011")) {
 			finished = true;
-			System.out.println("MEMORY: No memory operation\nEXIT");
+			System.out.println("EXECUTE: Exit Operation\nMEMORY: No memory operation\nWRITEBACK: No Writeback Operation\nEXIT");
 		}
 		else {
-			System.out.println("DECODE:");
+			System.out.print("DECODE: ");
 			String value = new BigInteger(instr.Value.substring(2), 16).toString(2);
 			String bin=String.format("%32s", value).replace(" ", "0");
 			boolean execute = true;
@@ -153,6 +155,7 @@ public class ARMDecoder {
 			if(flags.equals("0000")){
 				if(z==1) {
 					execute = true;
+					condflag = "EQ";
 				}
 				else{
 					execute = false;
@@ -161,6 +164,7 @@ public class ARMDecoder {
 			else if(flags.equals("0001")){
 				if(z==0) {
 					execute = true;
+					condflag = "NE";
 				}
 				else{
 					execute = false;
@@ -169,6 +173,7 @@ public class ARMDecoder {
 			else if(flags.equals("0010")){
 				if(c==1) {
 					execute = true;
+					condflag = "HS";
 				}
 				else{
 					execute = false;
@@ -177,6 +182,7 @@ public class ARMDecoder {
 			else if(flags.equals("0011")){
 				if(c==0) {
 					execute = true;
+					condflag = "LO";
 				}
 				else{
 					execute = false;
@@ -185,6 +191,7 @@ public class ARMDecoder {
 			else if(flags.equals("0100")){
 				if(n==1) {
 					execute = true;
+					condflag = "MI";
 				}
 				else{
 					execute = false;
@@ -193,6 +200,7 @@ public class ARMDecoder {
 			else if(flags.equals("0101")){
 				if(n==0) {
 					execute = true;
+					condflag = "PL";
 				}
 				else{
 					execute = false;
@@ -201,6 +209,7 @@ public class ARMDecoder {
 			else if(flags.equals("0110")){
 				if(v==1) {
 					execute = true;
+					condflag = "VS";
 				}
 				else{
 					execute = false;
@@ -209,6 +218,7 @@ public class ARMDecoder {
 			else if(flags.equals("0111")){
 				if(v==0) {
 					execute = true;
+					condflag = "VC";
 				}
 				else{
 					execute = false;
@@ -217,6 +227,7 @@ public class ARMDecoder {
 			else if(flags.equals("1000")){
 				if(c==1&&z==0) {
 					execute = true;
+					condflag = "HI";
 				}
 				else{
 					execute = false;
@@ -225,6 +236,7 @@ public class ARMDecoder {
 			else if(flags.equals("1001")){
 				if(c==0||z==1) {
 					execute = true;
+					condflag = "LS";
 				}
 				else{
 					execute = false;
@@ -233,6 +245,7 @@ public class ARMDecoder {
 			else if(flags.equals("1010")){
 				if(n==v) {
 					execute = true;
+					condflag = "GE";
 				}
 				else{
 					execute = false;
@@ -241,6 +254,7 @@ public class ARMDecoder {
 			else if(flags.equals("1011")){
 				if(n!=v) {
 					execute = true;
+					condflag = "LT";
 				}
 				else{
 					execute = false;
@@ -249,6 +263,7 @@ public class ARMDecoder {
 			else if(flags.equals("1100")){
 				if(z==0&&n==v) {
 					execute = true;
+					condflag = "GT";
 				}
 				else{
 					execute = false;
@@ -257,6 +272,7 @@ public class ARMDecoder {
 			else if(flags.equals("1101")){
 				if(z==1||n!=v) {
 					execute = true;
+					condflag = "LE";
 				}
 				else{
 					execute = false;
@@ -290,7 +306,7 @@ public class ARMDecoder {
 					System.out.println(Rd);
 					*/
 					String Imm="";
-					System.out.print("Operation is "+Opcodes.get(Opcode));
+					System.out.print("Operation is "+Opcodes.get(Opcode)+condflag);
 					System.out.print(" , First Operand is "+Registers.get(Rn));
 					int a = (new Operand2Calculator(bin.substring(20,32), I)).calcoperand();
 					if(I.equals("0")) 
@@ -322,15 +338,12 @@ public class ARMDecoder {
 				else if(bin.substring(4,7).equals("101"))
 				{
 					String Offset = bin.substring(8,32);
-					
 					int L=Integer.parseInt(bin.substring(7,8));
-					System.out.println("Operation is BRANCH, Link = "+L+", Offset = "+getTwosComplement(Offset));
+					System.out.println("Operation is BRANCH, Link = "+L+", Flag = "+condflag+", Offset = "+getTwosComplement(Offset));
 					Branch(L,Offset);
 				}
 				else if(bin.substring(4,6).equals("01")) {
-					System.out.println("Memory Function");
 					PC++;
-					System.out.print("Memory: ");
 					String mode = bin.substring(11, 16);
 					int a = Integer.parseInt(mode, 2);
 					String offset = bin.substring(20,32);
@@ -342,11 +355,15 @@ public class ARMDecoder {
 						off = (new Operand2Calculator(offset, "0")).calcoperand();
 					}
 					if(a==24) {
+						System.out.println("Memory Function");
+						System.out.print("Memory: ");
 						String Rn = bin.substring(12,16);
 						mem[off] = Registers.get(Rn).Value;
 						System.out.println(mem[off]+" written to "+off);
 					}
 					else if(a==25){
+						System.out.println("Memory Function");
+						System.out.print("Memory: ");
 						String Rd = bin.substring(16,20);
 						System.out.println(mem[off]+" from "+off+" written to Register "+Registers.get(Rd).Name);
 						Writeback(Registers.get(Rd), mem[off]);
@@ -358,7 +375,7 @@ public class ARMDecoder {
 						System.out.println("Instruction is write int.\nRead Registers:"+Registers.get("0001").show()+"\nEXECUTE:");
 						if(Registers.get("0000").Value==1)
 							System.out.println("Writing to Console: "+Registers.get("0001").Value);
-						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
+						System.out.println("MEMORY: No memory operation.\nWRITEBACK: No Writeback");
 					}
 					else if(instr.Value.endsWith("6c")|instr.Value.endsWith("6C")) {
 						System.out.println("Instruction is read int \nEXECUTE:");
@@ -366,13 +383,13 @@ public class ARMDecoder {
 						System.out.println("Reading from Console: ");
 						if(Registers.get("0000").Value==0)
 							try {n=Integer.parseInt(reader.readLine());}catch (NumberFormatException | IOException e ) {e.printStackTrace();}
-						System.out.println("MEMORY:\nNo memory operation");
+						System.out.println("MEMORY: No memory operation");
 						Writeback(Registers.get("0000"),n);
 					}
 					else if(instr.Value.endsWith("00")) {
 						System.out.println("Instruction is write char.\nRead Registers:"+Registers.get("0000").show()+"\nEXECUTE:");
 						System.out.println("Writing to Console: "+(char)Registers.get("0000").Value);
-						System.out.println("MEMORY:\nNo memory operation.\nWRITEBACK:\nNo Writeback");
+						System.out.println("MEMORY: No memory operation.\nWRITEBACK: No Writeback");
 					}
 				}
 			}
@@ -387,15 +404,17 @@ public class ARMDecoder {
 	private static void Branch(int l, String offset) {
 		String bin=String.format("%32s", offset).replace(" ", "0");
 		//System.out.println(Registers.get("1111").Value+" "+getTwosComplement(bin)+" "+getTwosComplement(offset));
-		System.out.println("EXECUTE:");
+		System.out.print("EXECUTE: ");
 		if(l==1) 
 			Registers.get("1110").Value=PC;
 			
 		int address=PC+getTwosComplement(offset)+2;
 		PC=address;
 		System.out.println("BRANCH to address PC+4("+4*getTwosComplement(offset)+")");
-		System.out.println(address);
 		Instruction i=ins.get(PC);
+		System.out.println("MEMORY: No memory operation.");
+		System.out.println("WRITEBACK: No writeback operation.");
+		System.out.println();
 		System.out.println("FETCH: instruction "+i.Value+" from address "+i.Address);
 		Decode(i);
 	}
@@ -430,19 +449,21 @@ public class ARMDecoder {
 	
 	private static void Execute(String OC, Register R1, Register R2, Integer Imm,Register RD, String s) 
 	{
-		System.out.println("EXECUTE:");
+		System.out.print("EXECUTE: ");
 		if(Opcodes.get(OC).equals("ADD"))
 		{
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				int h=R1.Value+R2.Value;
 				System.out.println("Adding "+R1.Value+" "+R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value+Imm;
 				System.out.println("Adding "+R1.Value+" and "+Imm);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}
 			if(s.equals("1"))
@@ -462,7 +483,8 @@ public class ARMDecoder {
 					z=0;
 					n=0;
 				}
-				
+				System.out.println("MEMORY: No memory operation.");	
+				System.out.println("WRITEBACK: No Writeback");
 			}
 		}
 		if(Opcodes.get(OC).equals("SUB"))
@@ -471,12 +493,14 @@ public class ARMDecoder {
 			{
 				int h=R1.Value-R2.Value;
 				System.out.println("Subtracting "+R2.Value+" from "+R1.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=R1.Value-Imm;
 				System.out.println("Subtracting "+Imm+" from "+R1.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}
 			if(s.equals("1"))
@@ -496,7 +520,8 @@ public class ARMDecoder {
 					z=0;
 					n=0;
 				}
-				
+				System.out.println("MEMORY: No memory operation.");		
+				System.out.println("WRITEBACK: No Writeback");			
 			}
 		}
 		if(Opcodes.get(OC).equals("RSB"))
@@ -505,12 +530,14 @@ public class ARMDecoder {
 			{
 				int h=R2.Value-R2.Value;
 				System.out.println("Subtracting "+R1.Value+" from "+R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}	
 			else
 			{
 				int h=Imm-R1.Value;
 				System.out.println("Subtracting "+R1.Value+" from "+Imm);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,h);
 			}
 		}
@@ -534,6 +561,8 @@ public class ARMDecoder {
 					n=0;
 				}
 				System.out.println("Comparing "+R1.Value+" and "+R2.Value);
+				System.out.println("MEMORY: No memory operation.");	
+				System.out.println("WRITEBACK: No Writeback");
 			}	
 			else
 			{
@@ -554,6 +583,8 @@ public class ARMDecoder {
 					
 				}
 				System.out.println("Comparing "+R1.Value+" and "+Imm);
+				System.out.println("MEMORY: No memory operation.");	
+				System.out.println("WRITEBACK: No Writeback");
 			}
 		}
 		
@@ -576,9 +607,10 @@ public class ARMDecoder {
 				{
 					z=0;
 					n=0;
-					
 				}
 				System.out.println("Not Comparing "+R1.Value+" and "+R2.Value);
+				System.out.println("MEMORY: No memory operation.");	
+				System.out.println("WRITEBACK: No Writeback");
 			}	
 			else
 			{
@@ -599,6 +631,8 @@ public class ARMDecoder {
 					
 				}
 				System.out.println("Not Comparing "+R1.Value+" and "+Imm);
+				System.out.println("MEMORY: No memory operation.");	
+				System.out.println("WRITEBACK: No Writeback");
 			}
 		}
 		if(Opcodes.get(OC).equals("MOV"))
@@ -606,12 +640,14 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null)
 			{
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R2.Value);
 				
 			}	
 			else
 			{
 				System.out.println("Moving "+Imm+" to "+RD.Name);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Imm);
 			}
 		}
@@ -621,12 +657,14 @@ public class ARMDecoder {
 			{
 				String bin = Integer.toBinaryString(~R2.Value);  //complement
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}	
 			else
 			{
 				String bin = Integer.toBinaryString(~Imm);
 				System.out.println("Not Moving "+Imm+" to "+RD.Name);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
 			}
 		}
@@ -635,11 +673,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				System.out.println("Exor "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value^R2.Value);
 			}	
 			else
 			{
 				System.out.println("Exor "+R1.Value+" and "+ Imm);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value^Imm);
 			}
 		}
@@ -648,11 +688,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				System.out.println("OR "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value  | R2.Value);
 			}	
 			else
 			{
 				System.out.println("OR "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value | Imm);
 			}
 		}
@@ -661,11 +703,13 @@ public class ARMDecoder {
 			if(R1!=null && R2!=null && RD!=null)
 			{
 				System.out.println("And "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value & R2.Value);
 			}	
 			else
 			{
 				System.out.println("And "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value & Imm);
 			}
 		}
@@ -676,6 +720,7 @@ public class ARMDecoder {
 				String h=Integer.toBinaryString(~R2.Value);
 				int g=Integer.parseInt(h, 2);
 				System.out.println("BIC "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value & g);
 			}	
 			else
@@ -683,6 +728,7 @@ public class ARMDecoder {
 				String h=Integer.toBinaryString(~Imm);
 				int g=Integer.parseInt(h, 2);
 				System.out.println("BIC "+R1.Value+" and "+ R2.Value);
+				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R1.Value & g);
 			}
 		}		
