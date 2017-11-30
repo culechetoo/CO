@@ -285,12 +285,15 @@ public class ARMDecoder {
 						String Rn = bin.substring(16, 20);
 						String Rs = bin.substring(20, 24);
 						String Rm = bin.substring(28, 32);
+						int result;
 						if(bin.substring(10).equals("1")) {
-							Registers.get(Rd).Value = Registers.get(Rm).Value*Registers.get(Rs).Value+Registers.get(Rn).Value;
+							System.out.println("Operation is MLA"+condflag+", First Operand is "+Registers.get(Rm));
+							result = Registers.get(Rm).Value*Registers.get(Rs).Value+Registers.get(Rn).Value;		
 						}
 						else {
-							Registers.get(Rd).Value = Registers.get(Rm).Value*Registers.get(Rs).Value;
+							result = Registers.get(Rm).Value*Registers.get(Rs).Value;
 						}
+						Writeback(Registers.get(Rd), result);
 					}
 					else {
 						PC++;
@@ -644,18 +647,12 @@ public class ARMDecoder {
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,R2.Value);
-				if(RD.Name=="1111") {
-					PC = RD.Value/4+1;
-				}
 			}	
 			else
 			{
 				System.out.println("Moving "+Imm+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Imm);
-				if(RD.Name=="1111") {
-					PC = RD.Value/4+1;
-				}
 			}
 		}
 		if(Opcodes.get(OC).equals("MVN"))
@@ -666,9 +663,6 @@ public class ARMDecoder {
 				System.out.println("Moving "+R2.Value+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
-				if(RD.Name=="1111") {
-					PC = RD.Value/4+1;
-				}
 			}	
 			else
 			{
@@ -676,9 +670,6 @@ public class ARMDecoder {
 				System.out.println("Not Moving "+Imm+" to "+RD.Name);
 				System.out.println("MEMORY: No memory operation.");
 				Writeback(RD,Integer.parseInt(bin, 2));
-				if(RD.Name=="1111") {
-					PC = RD.Value/4+1;
-				}
 			}
 		}
 		if(Opcodes.get(OC).equals("EOR"))
@@ -750,6 +741,9 @@ public class ARMDecoder {
 	{
 		Rd.Value=result;
 		System.out.println("WRITEBACK: "+result+" written to "+Rd.Name);
+		if(Rd.Name=="15") {
+			PC = Rd.Value/4+1;
+		}
 	}
 		
 }
